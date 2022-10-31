@@ -1,4 +1,4 @@
-# challenge_electricity_maps
+# My approach for solving the ML Engineer challenge
 
 The model should predict 24 hours of `carbon_intensity_avg` according to multiple covariate variables and as well as its own past values. 
 
