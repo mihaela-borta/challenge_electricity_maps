@@ -41,7 +41,8 @@ def generate_scaled_series(df, scaler, cat_cols, time_col, numerical_cols):
                                             value_cols=numerical_cols,
                                             freq='H')
 
-        scaled_series = scaler.transform(series)
+        print(numerical_cols, len(series[0]))
+        scaled_series = scaler.transform(series[0])
         return scaled_series
 
     except Exception as e:
@@ -74,18 +75,18 @@ def plot_predictions(target_column, target_series, pred_series, predictions_figu
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("model_file", help="Path to the pretrained model")
-    parser.add_argument("data_file", help="Path to the data used for inference")
-    parser.add_argument("target_column", help="Name of the target variable")
-    parser.add_argument("categorical_columns", help="Name of the categorical variables from the data file to be used for inference")
-    parser.add_argument("numerical_columns", help="Name of the numerical variables from the data file to be used for inference")
-    parser.add_argument("time_column", help="Name of the time variable in the data file")
-    parser.add_argument("scaler_covariates", help="Path to the scaler fitted to the covariates")
-    parser.add_argument("scaler_target", help="Path to the scaler fitted to the target")
-    parser.add_argument("predictions_figure", help="Path to the image to dump the predictions")
+    parser.add_argument("--model_file", help="Path to the pretrained model")
+    parser.add_argument("--data_file", help="Path to the data used for inference")
+    parser.add_argument("--target_column", help="Name of the target variable")
+    parser.add_argument("--categorical_columns", help="Name of the categorical variables from the data file to be used for inference")
+    parser.add_argument("--numerical_columns", help="Name of the numerical variables from the data file to be used for inference")
+    parser.add_argument("--time_column", help="Name of the time variable in the data file")
+    parser.add_argument("--scaler_covariates", help="Path to the scaler fitted to the covariates")
+    parser.add_argument("--scaler_target", help="Path to the scaler fitted to the target")
+    parser.add_argument("--predictions_figure", help="Path to the image to dump the predictions")
 
     args = parser.parse_args()
-    model = args.model
+    model_file = args.model_file
     data_file = args.data_file
     target_column = args.target_column
     categorical_columns = args.categorical_columns
@@ -98,14 +99,14 @@ def main():
 
     #Read the historical data which we will use for infering the next 24 hours
     try:
-        df = pd.read_csv(data_file, parse_dates=time_column)
+        df = pd.read_csv(data_file, parse_dates=[time_column])
     except Exception as e:
         print(str(e))
         sys.exit(1)
     
     #Load the model
     try:
-        my_model = torch.load(model, pickle_module=dill)
+        my_model = torch.load(model_file, pickle_module=dill)
     except FileNotFoundError as e:
         print(str(e))
         sys.exit(1)
@@ -145,7 +146,7 @@ def main():
     
     #Run the prediction for the next 24 hours
     try:
-        pred_series = model.predict(n=24, num_samples=200, series=target_scaled, past_covariates=covariates_scaled)
+        pred_series = my_model.predict(n=24, num_samples=200, series=target_scaled, past_covariates=covariates_scaled)
     except Exception as e:
         print(str(e))
         sys.exit(4)
