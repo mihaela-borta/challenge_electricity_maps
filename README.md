@@ -36,14 +36,29 @@ The idea is for the model to support several categorical columns such as `produc
 
 The TFT model was saved as a binary file -- this is used in the `src/inference.py` main file along side with the required data scalers in order to issue predictions.
 
+The script returns 1 day of predictions (including percentile predictions).
+
 Command to build the inference Docker image (on Windows 11):
 
 `docker -H unix:///mnt/wsl/shared-docker/docker.sock build --tag em-docker .`
 
 Command to create the container:
 
-`docker -H unix:///mnt/wsl/shared-docker/docker.sock run em-docker`
+`docker -H unix:///mnt/wsl/shared-docker/docker.sock run -it  --entrypoint /bin/bash   em-docker`
 
+Command to run the script:
+`python src/inference.py --model_file="model/tft_model.pt" --data_file="data/train_data_0.csv" --target_column="carbon_intensity_avg" --categorical_columns="['zone_name', 'production_sources']" --numerical_columns="['total_export_avg', 'power_production_coal_avg', 'power_production_gas_avg', 'power_production_oil_avg', 'power_consumption_solar_avg', 'power_consumption_unknown_avg', 'carbon_origin_percent_nuclear_avg', 'carbon_origin_percent_wind_avg', 'carbon_origin_percent_geothermal_avg', 'carbon_origin_percent_hydro_discharge_avg', 'power_net_import_DE_avg', 'power_net_import_DK-DK1_avg', 'latest_forecasted_precipitation_avg', 'latest_forecasted_solar_avg', 'latest_forecasted_wind_x_avg', 'latest_forecasted_wind_y_avg']" --time_column="datetime" --scaler_covariates="model/scaler_cov_0.pkl" --scaler_target="model/scaler_target_0.pkl" --predictions_figure="predictions.png"`
+
+Arguments for the script:
+- `model_file` -- Path to the pretrained model
+- `data_file` -- Path to the data used for inference
+- `target_column` -- Name of the target variable
+- `categorical_columns` -- Name of the categorical variables from the data file to be used for inference
+- `numerical_columns` -- Name of the numerical variables from the data file to be used for inference
+- `time_column` -- Name of the time variable in the data file
+- `scaler_covariates` -- Path to the scaler fitted to the covariates
+- `scaler_target` -- Path to the scaler fitted to the target
+- `predictions_figure` -- Path to the image to dump the predictions
 
 
 
